@@ -1,0 +1,12 @@
+[package]
+name = "contract-oracle"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+soroban-sdk.workspace = true
+amm-math.workspace = true
