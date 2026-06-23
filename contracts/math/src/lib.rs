@@ -20,7 +20,7 @@ pub struct LbpPool {
     pub swap_fee: u128,
     pub purchase_cap_per_wallet: u128,
     pub kyc_required: bool,
-    pub compliance_contract: Option<Address>,
+    pub compliance_contract: Address,
     pub min_holding_period: Option<u64>,
     pub total_usdc_raised: u128,
     pub is_active: bool,
@@ -45,7 +45,7 @@ pub struct BondingCurvePool {
     pub graduated: bool,
     pub purchase_cap_per_wallet: u128,
     pub kyc_required: bool,
-    pub compliance_contract: Option<Address>,
+    pub compliance_contract: Address,
 }
 
 #[contracttype]
@@ -145,7 +145,7 @@ pub struct LbpConfig {
     pub purchase_cap_per_wallet: Option<u128>,
     pub kyc_required: bool,
     pub min_kyc_tier: Option<u32>,
-    pub compliance_contract: Option<Address>,
+    pub compliance_contract: Address,
     pub min_holding_period: Option<u64>,
     pub graduation_threshold: u128,
 }
@@ -161,7 +161,7 @@ pub struct BondingConfig {
     pub price_ceiling: u128,
     pub purchase_cap_per_wallet: Option<u128>,
     pub kyc_required: bool,
-    pub compliance_contract: Option<Address>,
+    pub compliance_contract: Address,
 }
 
 #[contracttype]
