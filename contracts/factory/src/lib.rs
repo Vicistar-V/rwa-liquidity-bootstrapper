@@ -182,7 +182,7 @@ impl PoolFactory {
 
         let summary = PoolSummary {
             pool_id: pool_id.clone(),
-            pool_type: PoolType::Lbp,
+            pool_type: PoolType::BondingCurve,
             rwa_token: config.rwa_token.clone(),
             is_active: true,
             graduated: false,
@@ -329,35 +329,125 @@ impl PoolFactory {
     }
 
     pub fn get_pools_for_asset(env: Env, rwa_token: Address) -> Vec<PoolSummary> {
-        unimplemented!()
+        let all_ids: Vec<BytesN<32>> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::AllPoolIds)
+            .unwrap_or_else(|| Vec::new(&env));
+        let mut result: Vec<PoolSummary> = Vec::new(&env);
+        for i in 0..all_ids.len() {
+            let id = all_ids.get(i).unwrap();
+            let summary: PoolSummary = env
+                .storage()
+                .persistent()
+                .get(&DataKey::PoolSummary(id.clone()))
+                .unwrap();
+            if summary.rwa_token == rwa_token {
+                result.push_back(summary);
+            }
+        }
+        result
     }
 
     pub fn list_all_pools(env: Env, offset: u32, limit: u32) -> Vec<PoolSummary> {
-        unimplemented!()
+        let all_ids: Vec<BytesN<32>> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::AllPoolIds)
+            .unwrap_or_else(|| Vec::new(&env));
+        let mut result: Vec<PoolSummary> = Vec::new(&env);
+        let start = offset;
+        let end = (start + limit).min(all_ids.len());
+        for i in start..end {
+            let id = all_ids.get(i).unwrap();
+            let summary: PoolSummary = env
+                .storage()
+                .persistent()
+                .get(&DataKey::PoolSummary(id.clone()))
+                .unwrap();
+            result.push_back(summary);
+        }
+        result
     }
 
     pub fn get_pool_summary(env: Env, pool_id: BytesN<32>) -> PoolSummary {
-        unimplemented!()
+        env.storage()
+            .persistent()
+            .get(&DataKey::PoolSummary(pool_id))
+            .unwrap()
     }
 
     pub fn get_lbp_pool(env: Env, pool_id: BytesN<32>) -> LbpPool {
-        unimplemented!()
+        env.storage()
+            .persistent()
+            .get(&DataKey::LbpPool(pool_id))
+            .unwrap()
     }
 
     pub fn get_bonding_pool(env: Env, pool_id: BytesN<32>) -> BondingCurvePool {
-        unimplemented!()
+        env.storage()
+            .persistent()
+            .get(&DataKey::BondingPool(pool_id))
+            .unwrap()
     }
 
     pub fn mark_pool_graduated(env: Env, pool_id: BytesN<32>) {
-        unimplemented!()
+        let mut summary: PoolSummary = env
+            .storage()
+            .persistent()
+            .get(&DataKey::PoolSummary(pool_id.clone()))
+            .unwrap();
+        summary.graduated = true;
+        summary.is_active = false;
+        env.storage()
+            .persistent()
+            .set(&DataKey::PoolSummary(pool_id.clone()), &summary);
+
+        if env
+            .storage()
+            .persistent()
+            .has(&DataKey::LbpPool(pool_id.clone()))
+        {
+            let mut pool: LbpPool = env
+                .storage()
+                .persistent()
+                .get(&DataKey::LbpPool(pool_id.clone()))
+                .unwrap();
+            pool.is_active = false;
+            pool.graduated = true;
+            env.storage()
+                .persistent()
+                .set(&DataKey::LbpPool(pool_id), &pool);
+        } else if env
+            .storage()
+            .persistent()
+            .has(&DataKey::BondingPool(pool_id.clone()))
+        {
+            let mut pool: BondingCurvePool = env
+                .storage()
+                .persistent()
+                .get(&DataKey::BondingPool(pool_id.clone()))
+                .unwrap();
+            pool.is_active = false;
+            pool.graduated = true;
+            env.storage()
+                .persistent()
+                .set(&DataKey::BondingPool(pool_id), &pool);
+        }
     }
 
     pub fn get_fair_launch_contract(env: Env) -> Address {
-        unimplemented!()
+        env.storage()
+            .instance()
+            .get(&DataKey::FairLaunchContract)
+            .unwrap()
     }
 
     pub fn get_oracle_contract(env: Env) -> Address {
-        unimplemented!()
+        env.storage()
+            .instance()
+            .get(&DataKey::OracleContract)
+            .unwrap()
     }
 
     fn generate_pool_id(env: &Env) -> BytesN<32> {
