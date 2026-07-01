@@ -45,15 +45,15 @@ deploy_contract() {
 deploy_all() {
     echo "[2/3] Deploying contracts..."
 
-    FACTORY_ID=$(deploy_contract "contract_factory")
-    LBP_ID=$(deploy_contract "contract_lbp")
-    BONDING_ID=$(deploy_contract "contract_bonding")
-    CL_ID=$(deploy_contract "contract_cl")
-    FAIRLAUNCH_ID=$(deploy_contract "contract_fairlaunch")
-    GRADUATION_ID=$(deploy_contract "contract_graduation")
-    ORACLE_ID=$(deploy_contract "contract_oracle")
-    REWARDS_ID=$(deploy_contract "contract_rewards")
-    COMPLIANCE_ID=$(deploy_contract "contract_compliance")
+    FACTORY_ID=$(deploy_contract "contract-factory")
+    LBP_ID=$(deploy_contract "contract-lbp")
+    BONDING_ID=$(deploy_contract "contract-bonding")
+    CL_ID=$(deploy_contract "contract-cl")
+    FAIRLAUNCH_ID=$(deploy_contract "contract-fairlaunch")
+    GRADUATION_ID=$(deploy_contract "contract-graduation")
+    ORACLE_ID=$(deploy_contract "contract-oracle")
+    REWARDS_ID=$(deploy_contract "contract-rewards")
+    COMPLIANCE_ID=$(deploy_contract "contract-compliance")
 
     echo ""
     echo "All contracts deployed."

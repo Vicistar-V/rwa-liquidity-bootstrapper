@@ -28,6 +28,7 @@ usage() {
     echo "  --purchase-cap      Max USDC per wallet (default: 10000)"
     echo "  --fee-bps           Swap fee in basis points (default: 200)"
     echo "  --start-delay       Hours until pool starts (default: 1)"
+    echo "  --reserve-token     Address of the reserve token (default: same as RWA)"
     echo "  --curve-type        Bonding curve type: linear | logarithmic (default)"
     echo "  --price-ceiling     Max price for bonding curve"
     echo "  --max-supply        Max token supply for bonding curve"
@@ -51,6 +52,7 @@ MAX_SUPPLY=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --rwa-token) RWA_TOKEN="$2"; shift 2 ;;
+        --reserve-token) RESERVE_TOKEN="$2"; shift 2 ;;
         --amount) AMOUNT="$2"; shift 2 ;;
         --pool-type) POOL_TYPE="$2"; shift 2 ;;
         --weight-start) WEIGHT_START="$2"; shift 2 ;;
@@ -82,7 +84,9 @@ AMOUNT_SCALED="${AMOUNT}_0000000"
 PURCHASE_CAP_SCALED="${PURCHASE_CAP}_0000000"
 
 echo "=== Creating $POOL_TYPE Pool ==="
+RESERVE_TOKEN="${RESERVE_TOKEN:-$RWA_TOKEN}"
 echo "  RWA Token:      $RWA_TOKEN"
+echo "  Reserve Token:  $RESERVE_TOKEN"
 echo "  Amount:         $AMOUNT tokens"
 echo "  Duration:       $DURATION_DAYS days"
 echo "  Start:          $(date -d @"$START_TIME")"
@@ -117,6 +121,7 @@ elif [ "$POOL_TYPE" = "bonding" ]; then
         create_bonding_pool \
         --issuer "$SOURCE" \
         --rwa_token "$RWA_TOKEN" \
+        --reserve_token "$RESERVE_TOKEN" \
         --curve_type "$CURVE_TYPE" \
         --coefficient_a 10000000 \
         --coefficient_b 10000000 \
