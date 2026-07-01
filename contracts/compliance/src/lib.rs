@@ -7,20 +7,20 @@ pub struct ComplianceBridge;
 
 #[contractimpl]
 impl ComplianceBridge {
-    pub fn initialize(env: Env, pool_id: BytesN<32>, compliance_contract: Address) {
+    pub fn initialize(_env: Env, _pool_id: BytesN<32>, _compliance_contract: Address) {
         unimplemented!()
     }
 
     pub fn check_purchase(
-        env: Env,
-        buyer: Address,
-        pool_id: BytesN<32>,
-        amount: u128,
+        _env: Env,
+        _buyer: Address,
+        _pool_id: BytesN<32>,
+        _amount: u128,
     ) -> ComplianceDecision {
         unimplemented!()
     }
 
-    pub fn set_compliance_contract(env: Env, pool_id: BytesN<32>, contract: Address) {
+    pub fn set_compliance_contract(_env: Env, _pool_id: BytesN<32>, _contract: Address) {
         unimplemented!()
     }
 }
