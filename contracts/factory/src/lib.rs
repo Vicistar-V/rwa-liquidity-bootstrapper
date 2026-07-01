@@ -68,7 +68,7 @@ impl PoolFactory {
         let pool = LbpPool {
             pool_id: pool_id.clone(),
             rwa_token: config.rwa_token.clone(),
-            usdc_token: config.rwa_token.clone(),
+            usdc_token: config.usdc_token.clone(),
             weight_rwa_start: config.weight_rwa_start,
             weight_rwa_end: config.weight_rwa_end,
             start_time: config.start_time,

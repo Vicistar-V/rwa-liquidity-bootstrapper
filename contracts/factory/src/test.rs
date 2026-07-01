@@ -114,6 +114,7 @@ fn test_create_lbp_pool() {
 
     let config = LbpConfig {
         rwa_token: token_id.clone(),
+        usdc_token: token_id.clone(),
         rwa_amount: 1000_0000000,
         weight_rwa_start: 9600000,
         weight_rwa_end: 5000000,
@@ -228,6 +229,7 @@ fn test_list_all_pools_pagination() {
 
     let config = LbpConfig {
         rwa_token: token_id.clone(),
+        usdc_token: token_id.clone(),
         rwa_amount: 1000_0000000,
         weight_rwa_start: 9600000,
         weight_rwa_end: 5000000,
@@ -286,7 +288,8 @@ fn test_get_pools_for_asset() {
     factory_client.init(&admin, &lbp_id, &bonding_id, &cl_id, &fl_id, &oracle_id);
 
     let make_config = |token: Address| LbpConfig {
-        rwa_token: token,
+        rwa_token: token.clone(),
+        usdc_token: token,
         rwa_amount: 1000_0000000,
         weight_rwa_start: 9600000,
         weight_rwa_end: 5000000,
@@ -335,7 +338,8 @@ fn test_mark_pool_graduated() {
     factory_client.init(&admin, &lbp_id, &bonding_id, &cl_id, &fl_id, &oracle_id);
 
     let config = LbpConfig {
-        rwa_token: token_id,
+        rwa_token: token_id.clone(),
+        usdc_token: token_id,
         rwa_amount: 1000_0000000,
         weight_rwa_start: 9600000,
         weight_rwa_end: 5000000,

@@ -136,6 +136,7 @@ pub struct PoolSummary {
 #[derive(Clone, Debug)]
 pub struct LbpConfig {
     pub rwa_token: Address,
+    pub usdc_token: Address,
     pub rwa_amount: u128,
     pub weight_rwa_start: u128,
     pub weight_rwa_end: u128,

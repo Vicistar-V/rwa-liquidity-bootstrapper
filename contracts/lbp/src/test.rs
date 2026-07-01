@@ -53,6 +53,7 @@ fn setup_test_env() -> (Env, Address, amm_math::LbpConfig, Address, Address) {
 
     let pool_config = LbpConfig {
         rwa_token: token_id.clone(),
+        usdc_token: token_id.clone(),
         rwa_amount: 1_000_000_0000000,
         weight_rwa_start: 9600000,
         weight_rwa_end: 5000000,

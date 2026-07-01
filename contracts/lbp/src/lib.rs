@@ -40,7 +40,7 @@ impl LbpPoolContract {
         let pool = LbpPool {
             pool_id: pool_id.clone(),
             rwa_token: config.rwa_token.clone(),
-            usdc_token: config.rwa_token.clone(),
+            usdc_token: config.usdc_token.clone(),
             weight_rwa_start: config.weight_rwa_start,
             weight_rwa_end: config.weight_rwa_end,
             start_time: config.start_time,
@@ -156,7 +156,7 @@ impl LbpPoolContract {
             fl_record_args,
         );
 
-        let usdc_client = token::Client::new(&env, &pool.rwa_token);
+        let usdc_client = token::Client::new(&env, &pool.usdc_token);
         usdc_client.transfer(&buyer, &env.current_contract_address(), &(max_usdc_in as i128));
 
         let rwa_client = token::Client::new(&env, &pool.rwa_token);
