@@ -1,6 +1,6 @@
-use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env, Vec};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env};
 
-use amm_math::{FairLaunchConfig, FairLaunchError, WalletPurchaseRecord};
+use amm_math::{FairLaunchConfig, WalletPurchaseRecord};
 
 #[contracttype]
 pub enum FairLaunchDataKey {
