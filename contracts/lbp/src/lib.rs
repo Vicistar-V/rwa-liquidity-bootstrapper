@@ -20,7 +20,7 @@ impl LbpPoolContract {
         env: Env,
         pool_id: BytesN<32>,
         config: LbpConfig,
-        issuer: Address,
+        _issuer: Address,
         fair_launch_contract: Address,
         oracle_contract: Address,
     ) {
@@ -37,7 +37,6 @@ impl LbpPoolContract {
             panic!("pool already exists");
         }
 
-        let now = env.ledger().timestamp();
         let pool = LbpPool {
             pool_id: pool_id.clone(),
             rwa_token: config.rwa_token.clone(),
