@@ -3,7 +3,7 @@ use soroban_sdk::{
 };
 
 use amm_math::{
-    fixed_div, fixed_exp, fixed_ln, fixed_mul, fixed_pow, integral_logarithmic, sigmoid,
+    fixed_div, fixed_ln, fixed_mul, fixed_pow, integral_logarithmic, sigmoid,
     BondingConfig, BondingCurvePool, CurveType, SCALE,
 };
 
@@ -100,16 +100,12 @@ fn calculate_purchase_cost(pool: &BondingCurvePool, token_amount: u128) -> u128 
             let steps = 100u128;
             let step_size = token_amount / steps;
             let mut cost: u128 = 0;
-            for i in 0..100 {
-                let s = s1.saturating_add(step_size.saturating_mul(i));
-                let mut p = pool.current_supply;
-                p = s;
+            for _i in 0..100 {
                 let price = get_price_sigmoid(pool);
                 cost = cost.saturating_add(fixed_mul(price, step_size));
             }
             let remainder = token_amount.saturating_sub(step_size.saturating_mul(100));
             if remainder > 0 {
-                let final_s = s2;
                 let price = get_price_sigmoid(pool);
                 cost = cost.saturating_add(fixed_mul(price, remainder));
             }
@@ -164,7 +160,7 @@ impl BondingCurveContract {
         env: Env,
         pool_id: BytesN<32>,
         config: BondingConfig,
-        issuer: Address,
+        _issuer: Address,
         fair_launch_contract: Address,
         oracle_contract: Address,
     ) {
