@@ -43,6 +43,15 @@ init_graduation_engine() {
         --rpc-url "$RPC_URL" \
         --network-passphrase "$NETWORK_PASSPHRASE" \
         -- \
+        set_admin \
+        --admin "$SOURCE"
+
+    soroban contract invoke \
+        --id "$GRADUATION_ENGINE_CONTRACT_ID" \
+        --source "$SOURCE" \
+        --rpc-url "$RPC_URL" \
+        --network-passphrase "$NETWORK_PASSPHRASE" \
+        -- \
         set_factory \
         --factory "$POOL_FACTORY_CONTRACT_ID"
 

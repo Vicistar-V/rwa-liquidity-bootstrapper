@@ -15,6 +15,7 @@ pub enum GraduationDataKey {
     FairLaunchContract,
     ProtocolFeeRecipient,
     DexSeedAddress,
+    Admin,
 }
 
 #[contracttype]
@@ -44,19 +45,31 @@ impl GraduationEngine {
         env.storage().persistent().set(&GraduationDataKey::Config(pool_id), &config);
     }
 
+    pub fn set_admin(env: Env, admin: Address) {
+        if !env.storage().instance().has(&GraduationDataKey::Admin) {
+            env.storage().instance().set(&GraduationDataKey::Admin, &admin);
+        }
+    }
+
     pub fn set_factory(env: Env, factory: Address) {
+        let admin: Address = env.storage().instance().get(&GraduationDataKey::Admin).unwrap();
+        admin.require_auth();
         if !env.storage().instance().has(&GraduationDataKey::FactoryContract) {
             env.storage().instance().set(&GraduationDataKey::FactoryContract, &factory);
         }
     }
 
     pub fn set_fair_launch(env: Env, fair_launch: Address) {
+        let admin: Address = env.storage().instance().get(&GraduationDataKey::Admin).unwrap();
+        admin.require_auth();
         if !env.storage().instance().has(&GraduationDataKey::FairLaunchContract) {
             env.storage().instance().set(&GraduationDataKey::FairLaunchContract, &fair_launch);
         }
     }
 
     pub fn set_fee_recipients(env: Env, protocol: Address, dex_seed: Address) {
+        let admin: Address = env.storage().instance().get(&GraduationDataKey::Admin).unwrap();
+        admin.require_auth();
         env.storage().instance().set(&GraduationDataKey::ProtocolFeeRecipient, &protocol);
         env.storage().instance().set(&GraduationDataKey::DexSeedAddress, &dex_seed);
     }

@@ -60,6 +60,7 @@ fn setup_time_env() -> (Env, Address, Address, Address) {
     sac.mint(&grad_id, &i128::MAX);
 
     let client = crate::GraduationEngineClient::new(&env, &grad_id);
+    client.set_admin(&admin);
     client.set_factory(&factory_id);
     client.set_fair_launch(&fl_id);
     client.set_fee_recipients(
@@ -148,6 +149,7 @@ fn test_graduate_pool_full_flow() {
     let token_id = env.register_stellar_asset_contract(admin.clone());
 
     let client = crate::GraduationEngineClient::new(&env, &grad_id);
+    client.set_admin(&admin);
     client.set_factory(&factory_id);
     client.set_fair_launch(&fl_id);
 
