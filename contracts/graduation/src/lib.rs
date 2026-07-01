@@ -163,7 +163,7 @@ impl GraduationEngine {
         let pool_summary: amm_math::PoolSummary = env
             .invoke_contract(&factory, &Symbol::new(&env, "get_pool_summary"), pool_args);
 
-        let usdc_token = pool_summary.rwa_token;
+        let usdc_token = pool_summary.usdc_token;
 
         let protocol_fee_recv: Address = env
             .storage()

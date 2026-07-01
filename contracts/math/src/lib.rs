@@ -127,6 +127,7 @@ pub struct PoolSummary {
     pub pool_id: BytesN<32>,
     pub pool_type: PoolType,
     pub rwa_token: Address,
+    pub usdc_token: Address,
     pub is_active: bool,
     pub graduated: bool,
     pub total_usdc_raised: u128,

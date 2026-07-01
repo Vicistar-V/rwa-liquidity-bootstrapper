@@ -28,7 +28,8 @@ impl MockFactoryForGraduation {
         PoolSummary {
             pool_id,
             pool_type: PoolType::Lbp,
-            rwa_token: token,
+            rwa_token: token.clone(),
+            usdc_token: token,
             is_active: false,
             graduated: true,
             total_usdc_raised: 0,
