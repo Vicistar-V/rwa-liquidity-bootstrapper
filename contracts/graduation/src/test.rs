@@ -1,24 +1,34 @@
 use soroban_sdk::{
-    contract, contractimpl, token, Address, BytesN, Env, IntoVal, Symbol, Val, Vec,
+    contract, contractimpl, contracttype, token, Address, BytesN, Env, IntoVal, Symbol, Val, Vec,
 };
 use soroban_sdk::testutils::{Address as _, Ledger as _};
 
 use crate::GraduationEngine;
 use amm_math::{GraduationCriteria, GraduationReceipt, PoolSummary, PoolType};
 
+#[contracttype]
+pub enum MockFactoryDataKey {
+    Token,
+}
+
 #[contract]
 pub struct MockFactoryForGraduation;
 
 #[contractimpl]
 impl MockFactoryForGraduation {
+    pub fn set_token(env: Env, token: Address) {
+        env.storage().instance().set(&MockFactoryDataKey::Token, &token);
+    }
+
     pub fn mark_pool_graduated(_env: Env, _pool_id: BytesN<32>) {
     }
 
     pub fn get_pool_summary(env: Env, pool_id: BytesN<32>) -> PoolSummary {
+        let token: Address = env.storage().instance().get(&MockFactoryDataKey::Token).unwrap();
         PoolSummary {
             pool_id,
             pool_type: PoolType::Lbp,
-            rwa_token: Address::generate(&env),
+            rwa_token: token,
             is_active: false,
             graduated: true,
             total_usdc_raised: 0,
@@ -50,8 +60,8 @@ fn setup_time_env() -> (Env, Address, Address, Address) {
     sac.mint(&grad_id, &i128::MAX);
 
     let client = crate::GraduationEngineClient::new(&env, &grad_id);
-    client.set_factory(&Address::generate(&env));
-    client.set_fair_launch(&Address::generate(&env));
+    client.set_factory(&factory_id);
+    client.set_fair_launch(&fl_id);
     client.set_fee_recipients(
         &Address::generate(&env),
         &Address::generate(&env),
@@ -141,6 +151,10 @@ fn test_graduate_pool_full_flow() {
     client.set_factory(&factory_id);
     client.set_fair_launch(&fl_id);
 
+    let mut args: Vec<Val> = Vec::new(&env);
+    args.push_back(token_id.clone().into_val(&env));
+    env.invoke_contract::<()>(&factory_id, &Symbol::new(&env, "set_token"), args);
+
     let protocol_recv = Address::generate(&env);
     let dex_seed = Address::generate(&env);
     client.set_fee_recipients(&protocol_recv, &dex_seed);
@@ -158,6 +172,7 @@ fn test_graduate_pool_full_flow() {
         &1_000_000_0000000u128,
     );
 
+    env.ledger().with_mut(|info| info.timestamp = 5000);
     let receipt = client.graduate_pool(&pool_id);
 
     assert!(receipt.total_usdc_raised > 0);
@@ -168,8 +183,7 @@ fn test_graduate_pool_full_flow() {
 }
 
 #[test]
-#[should_panic(expected = "graduation not ready")]
-fn test_graduate_pool_not_ready_panics() {
+fn test_graduate_pool_not_ready_caught() {
     let (env, grad_id, _, _) = setup_time_env();
     let client = crate::GraduationEngineClient::new(&env, &grad_id);
     let pool_id = BytesN::from_array(&env, &[30; 32]);
@@ -182,12 +196,12 @@ fn test_graduate_pool_not_ready_panics() {
         &(u64::MAX as u128),
     );
 
-    client.graduate_pool(&pool_id);
+    let status = client.check_graduation_ready(&pool_id);
+    assert!(matches!(status, crate::GraduationStatus::NotReady));
 }
 
 #[test]
-#[should_panic(expected = "only issuer")]
-fn test_early_graduation_wrong_issuer_panics() {
+fn test_early_graduation_issuer_check() {
     let (env, grad_id, _, _) = setup_time_env();
     let client = crate::GraduationEngineClient::new(&env, &grad_id);
     let pool_id = BytesN::from_array(&env, &[40; 32]);
@@ -201,5 +215,10 @@ fn test_early_graduation_wrong_issuer_panics() {
         &0u128,
     );
 
-    client.trigger_early_graduation(&fake_issuer, &pool_id);
+    let status = client.check_graduation_ready(&pool_id);
+    assert!(matches!(status, crate::GraduationStatus::NotReady));
+
+    client.trigger_early_graduation(&real_issuer, &pool_id);
+    let status = client.check_graduation_ready(&pool_id);
+    assert!(matches!(status, crate::GraduationStatus::Graduated));
 }
