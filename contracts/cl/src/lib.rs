@@ -275,6 +275,13 @@ impl ConcentratedLiquidityContract {
         (rwa_fees, usdc_fees)
     }
 
+    pub fn get_pool_details(env: Env, pool_id: BytesN<32>) -> ConcentratedLiquidityPool {
+        env.storage()
+            .persistent()
+            .get(&ClDataKey::Pool(pool_id))
+            .unwrap()
+    }
+
     pub fn get_position(
         env: Env,
         pool_id: BytesN<32>,
@@ -336,3 +343,6 @@ impl ConcentratedLiquidityContract {
         }
     }
 }
+
+#[cfg(test)]
+mod test;
