@@ -266,3 +266,6 @@ impl LbpPoolContract {
         }
     }
 }
+
+#[cfg(test)]
+mod test;

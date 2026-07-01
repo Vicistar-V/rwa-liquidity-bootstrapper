@@ -207,7 +207,7 @@ pub enum FairLaunchError {
 }
 
 #[contracttype]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PoolType {
     Lbp,
     BondingCurve,
@@ -221,3 +221,6 @@ pub enum ComplianceDecision {
     Reject(BytesN<32>),
     PendingKyc,
 }
+
+#[cfg(test)]
+mod test;

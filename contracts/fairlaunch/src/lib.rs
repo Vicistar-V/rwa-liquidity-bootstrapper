@@ -239,3 +239,6 @@ impl FairLaunchController {
             .unwrap_or((0, 0))
     }
 }
+
+#[cfg(test)]
+mod test;

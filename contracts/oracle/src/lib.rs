@@ -146,3 +146,6 @@ impl TwapOracle {
         result
     }
 }
+
+#[cfg(test)]
+mod test;

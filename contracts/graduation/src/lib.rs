@@ -254,3 +254,6 @@ impl GraduationEngine {
         state.0
     }
 }
+
+#[cfg(test)]
+mod test;
