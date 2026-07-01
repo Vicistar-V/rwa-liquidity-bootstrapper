@@ -195,19 +195,6 @@ pub enum GraduationCriteria {
 }
 
 #[contracttype]
-#[derive(Clone, Debug)]
-pub enum FairLaunchError {
-    WalletCapExceeded,
-    PoolOwnershipCapExceeded,
-    CooldownNotElapsed,
-    BlackoutPeriodActive,
-    WalletTooNew,
-    KycRequired,
-    InsufficientKycTier,
-    JurisdictionProhibited,
-}
-
-#[contracttype]
 #[derive(Clone, Debug, PartialEq)]
 pub enum PoolType {
     Lbp,
