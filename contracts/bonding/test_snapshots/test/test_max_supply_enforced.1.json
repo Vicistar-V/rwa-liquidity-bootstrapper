@@ -2361,6 +2361,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "reserve_token"
+                      },
+                      "val": {
+                        "address": "CBUSYNQKASUYFWYC3M2GUEDMX4AIVWPALDBYJPNK6554BREHTGZ2IUNF"
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "rwa_token"
                       },
                       "val": {

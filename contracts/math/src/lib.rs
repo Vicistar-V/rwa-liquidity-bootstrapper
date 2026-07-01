@@ -154,6 +154,7 @@ pub struct LbpConfig {
 #[derive(Clone, Debug)]
 pub struct BondingConfig {
     pub rwa_token: Address,
+    pub reserve_token: Address,
     pub curve_type: CurveType,
     pub coefficient_a: u128,
     pub coefficient_b: u128,

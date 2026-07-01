@@ -164,7 +164,7 @@ impl PoolFactory {
         let pool = BondingCurvePool {
             pool_id: pool_id.clone(),
             rwa_token: config.rwa_token.clone(),
-            reserve_token: config.rwa_token.clone(),
+            reserve_token: config.reserve_token.clone(),
             curve_type: config.curve_type.clone(),
             curve_coefficient_a: config.coefficient_a,
             curve_coefficient_b: config.coefficient_b,
@@ -232,6 +232,7 @@ impl PoolFactory {
         args.push_back(pool_id.clone().into_val(&env));
         args.push_back(config.into_val(&env));
         args.push_back(issuer.into_val(&env));
+        args.push_back(config.reserve_token.clone().into_val(&env));
         args.push_back(fair_launch.into_val(&env));
         args.push_back(oracle.into_val(&env));
         env.invoke_contract::<()>(

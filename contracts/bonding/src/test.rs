@@ -1,5 +1,5 @@
-use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
-use soroban_sdk::testutils::{Address as _, Ledger as _};
+use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env};
+use soroban_sdk::testutils::Address as _;
 
 use crate::BondingCurveContract;
 use amm_math::{BondingConfig, CurveType, SCALE};
@@ -64,6 +64,7 @@ fn init_and_return_basic_config(env: &Env, bonding_id: &Address, pool_id: &Bytes
     let client = crate::BondingCurveContractClient::new(env, bonding_id);
     let config = BondingConfig {
         rwa_token: rwa_id.clone(),
+        reserve_token: reserve_id.clone(),
         curve_type: CurveType::Linear,
         coefficient_a: SCALE,
         coefficient_b: SCALE / 10,
@@ -113,6 +114,7 @@ fn test_logarithmic_curve_pricing() {
 
     let config = BondingConfig {
         rwa_token: rwa_id,
+        reserve_token: reserve_id.clone(),
         curve_type: CurveType::Logarithmic,
         coefficient_a: SCALE,
         coefficient_b: SCALE / 10,
@@ -195,6 +197,7 @@ fn test_max_supply_enforced() {
 
     let config = BondingConfig {
         rwa_token: rwa_id,
+        reserve_token: reserve_id.clone(),
         curve_type: CurveType::Linear,
         coefficient_a: SCALE,
         coefficient_b: SCALE / 10,
@@ -227,6 +230,7 @@ fn test_price_ceiling_enforced() {
 
     let config = BondingConfig {
         rwa_token: rwa_id,
+        reserve_token: reserve_id.clone(),
         curve_type: CurveType::Linear,
         coefficient_a: 10 * SCALE,
         coefficient_b: 0,
@@ -257,6 +261,7 @@ fn test_sigmoid_curve_pricing() {
 
     let config = BondingConfig {
         rwa_token: rwa_id,
+        reserve_token: reserve_id.clone(),
         curve_type: CurveType::Sigmoid,
         coefficient_a: SCALE / 100,
         coefficient_b: SCALE / 10,

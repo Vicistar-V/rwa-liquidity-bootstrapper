@@ -164,7 +164,7 @@ impl BondingCurveContract {
         pool_id: BytesN<32>,
         config: BondingConfig,
         _issuer: Address,
-        reserve_token: Address,
+        _reserve_token: Address,
         fair_launch_contract: Address,
         oracle_contract: Address,
     ) {
@@ -192,7 +192,7 @@ impl BondingCurveContract {
         let pool = BondingCurvePool {
             pool_id: pool_id.clone(),
             rwa_token: config.rwa_token.clone(),
-            reserve_token: reserve_token.clone(),
+            reserve_token: config.reserve_token.clone(),
             curve_type: config.curve_type.clone(),
             curve_coefficient_a: config.coefficient_a,
             curve_coefficient_b: config.coefficient_b,

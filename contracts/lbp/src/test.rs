@@ -1,8 +1,8 @@
-use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
-use soroban_sdk::testutils::{Address as _, Ledger as _};
+use soroban_sdk::{contract, contractimpl, token, Address, BytesN, Env};
+use soroban_sdk::testutils::{Address as _, Ledger};
 
 use crate::LbpPoolContract;
-use amm_math::{LbpConfig, SCALE};
+use amm_math::LbpConfig;
 
 #[contract]
 pub struct MockFairLaunchForLbp;
@@ -50,8 +50,6 @@ fn setup_test_env() -> (Env, Address, amm_math::LbpConfig, Address, Address) {
         env.register_contract(None, MockFairLaunchForLbp);
     let oracle_id =
         env.register_contract(None, MockOracleForLbp);
-
-    let lbp_client = crate::LbpPoolContractClient::new(&env, &lbp_id);
 
     let pool_config = LbpConfig {
         rwa_token: token_id.clone(),

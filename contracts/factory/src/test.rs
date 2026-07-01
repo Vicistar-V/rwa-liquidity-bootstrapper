@@ -1,8 +1,8 @@
-use soroban_sdk::{token, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
-use soroban_sdk::testutils::{Address as _, Ledger as _};
+use soroban_sdk::{token, Address, Env};
+use soroban_sdk::testutils::Address as _;
 
-use crate::{DataKey, PoolFactory};
-use amm_math::{BondingConfig, ClConfig, CurveType, LbpConfig, PoolSummary, PoolType, SCALE};
+use crate::PoolFactory;
+use amm_math::{BondingConfig, ClConfig, CurveType, LbpConfig, PoolType, SCALE};
 
 mod lbp_mock {
     use soroban_sdk::{contract, contractimpl, Address, BytesN, Env};
@@ -39,6 +39,7 @@ mod bonding_mock {
             _pool_id: BytesN<32>,
             _config: BondingConfig,
             _issuer: Address,
+            _reserve_token: Address,
             _fair_launch: Address,
             _oracle: Address,
         ) {
@@ -47,7 +48,7 @@ mod bonding_mock {
 }
 
 mod cl_mock {
-    use soroban_sdk::{contract, contractimpl, Address, BytesN, Env};
+    use soroban_sdk::{contract, contractimpl, BytesN, Env};
     use amm_math::ClConfig;
 
     #[contract]
@@ -154,7 +155,8 @@ fn test_create_bonding_pool() {
     factory_client.init(&admin, &lbp_id, &bonding_id, &cl_id, &fl_id, &oracle_id);
 
     let config = BondingConfig {
-        rwa_token: token_id,
+        rwa_token: token_id.clone(),
+        reserve_token: token_id,
         curve_type: CurveType::Logarithmic,
         coefficient_a: SCALE,
         coefficient_b: SCALE / 10,

@@ -181,6 +181,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "reserve_token"
+                      },
+                      "val": {
+                        "address": "CBUSYNQKASUYFWYC3M2GUEDMX4AIVWPALDBYJPNK6554BREHTGZ2IUNF"
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "rwa_token"
                       },
                       "val": {
@@ -1570,6 +1578,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "reserve_token"
+                      },
+                      "val": {
+                        "address": "CBUSYNQKASUYFWYC3M2GUEDMX4AIVWPALDBYJPNK6554BREHTGZ2IUNF"
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "rwa_token"
                       },
                       "val": {
@@ -1695,6 +1711,14 @@
                     },
                     {
                       "key": {
+                        "symbol": "reserve_token"
+                      },
+                      "val": {
+                        "address": "CBUSYNQKASUYFWYC3M2GUEDMX4AIVWPALDBYJPNK6554BREHTGZ2IUNF"
+                      }
+                    },
+                    {
+                      "key": {
                         "symbol": "rwa_token"
                       },
                       "val": {
@@ -1705,6 +1729,9 @@
                 },
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                },
+                {
+                  "address": "CBUSYNQKASUYFWYC3M2GUEDMX4AIVWPALDBYJPNK6554BREHTGZ2IUNF"
                 },
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARQG5"
