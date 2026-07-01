@@ -93,7 +93,7 @@ impl LbpPoolContract {
             .persistent()
             .get(&LbpDataKey::Pool(pool_id.clone()))
             .unwrap();
-        Self::compute_in_given_out(&pool, rwa_out)
+        Self::compute_in_given_out(&env, &pool, rwa_out)
     }
 
     pub fn calculate_out_given_in(env: Env, pool_id: BytesN<32>, usdc_in: u128) -> u128 {
@@ -102,7 +102,7 @@ impl LbpPoolContract {
             .persistent()
             .get(&LbpDataKey::Pool(pool_id.clone()))
             .unwrap();
-        Self::compute_out_given_in(&pool, usdc_in)
+        Self::compute_out_given_in(&env, &pool, usdc_in)
     }
 
     pub fn buy(
@@ -124,7 +124,7 @@ impl LbpPoolContract {
             panic!("pool is not active");
         }
 
-        let rwa_out = Self::compute_out_given_in(&pool, max_usdc_in);
+        let rwa_out = Self::compute_out_given_in(&env, &pool, max_usdc_in);
 
         if rwa_out < min_rwa_out {
             panic!("slippage: rwa_out below minimum");
@@ -230,12 +230,12 @@ impl LbpPoolContract {
         fixed_div(numerator, denominator)
     }
 
-    fn compute_in_given_out(pool: &LbpPool, rwa_out: u128) -> u128 {
+    fn compute_in_given_out(env: &Env, pool: &LbpPool, rwa_out: u128) -> u128 {
         if rwa_out >= pool.balance_rwa {
             panic!("insufficient liquidity");
         }
 
-        let w_rwa = pool.weight_rwa_start;
+        let w_rwa = Self::compute_current_weight_rwa(env, pool);
         let w_usdc = SCALE.saturating_sub(w_rwa);
 
         let ratio = fixed_div(pool.balance_rwa, pool.balance_rwa.saturating_sub(rwa_out));
@@ -247,8 +247,8 @@ impl LbpPoolContract {
         usdc_in.saturating_add(fee)
     }
 
-    fn compute_out_given_in(pool: &LbpPool, usdc_in: u128) -> u128 {
-        let w_rwa = pool.weight_rwa_start;
+    fn compute_out_given_in(env: &Env, pool: &LbpPool, usdc_in: u128) -> u128 {
+        let w_rwa = Self::compute_current_weight_rwa(env, pool);
         let w_usdc = SCALE.saturating_sub(w_rwa);
 
         let fee = fixed_mul(usdc_in, pool.swap_fee) / 10000;
