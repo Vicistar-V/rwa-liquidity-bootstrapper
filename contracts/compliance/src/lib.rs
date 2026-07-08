@@ -1,4 +1,4 @@
-use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
 
 use amm_math::ComplianceDecision;
 
@@ -7,6 +7,8 @@ pub enum ComplianceDataKey {
     Admin,
     Initialized,
     PoolConfig(BytesN<32>),
+    WalletKyc(Address),
+    Blacklisted(Address),
 }
 
 #[contracttype]
@@ -15,6 +17,15 @@ pub struct PoolComplianceConfig {
     pub kyc_required: bool,
     pub min_kyc_tier: u32,
     pub external_compliance_contract: Option<Address>,
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct KycStatus {
+    pub wallet: Address,
+    pub tier: u32,
+    pub verified: bool,
+    pub timestamp: u64,
 }
 
 #[contract]
@@ -74,22 +85,125 @@ impl ComplianceBridge {
             .get(&ComplianceDataKey::PoolConfig(pool_id))
     }
 
-    pub fn check_purchase(
-        _env: Env,
-        _buyer: Address,
-        _pool_id: BytesN<32>,
-        _amount: u128,
-    ) -> ComplianceDecision {
-        ComplianceDecision::Approve
-    }
-
-    pub fn set_compliance_contract(_env: Env, _pool_id: BytesN<32>, _contract: Address) {
-        let admin: Address = _env
+    pub fn set_wallet_kyc(env: Env, wallet: Address, tier: u32, verified: bool) {
+        let admin: Address = env
             .storage()
             .instance()
             .get(&ComplianceDataKey::Admin)
             .unwrap();
         admin.require_auth();
+        let status = KycStatus {
+            wallet: wallet.clone(),
+            tier,
+            verified,
+            timestamp: env.ledger().timestamp(),
+        };
+        env.storage()
+            .persistent()
+            .set(&ComplianceDataKey::WalletKyc(wallet), &status);
+    }
+
+    pub fn get_wallet_kyc(env: Env, wallet: Address) -> Option<KycStatus> {
+        env.storage()
+            .persistent()
+            .get(&ComplianceDataKey::WalletKyc(wallet))
+    }
+
+    pub fn set_blacklisted(env: Env, wallet: Address, blacklisted: bool) {
+        let admin: Address = env
+            .storage()
+            .instance()
+            .get(&ComplianceDataKey::Admin)
+            .unwrap();
+        admin.require_auth();
+        if blacklisted {
+            env.storage()
+                .persistent()
+                .set(&ComplianceDataKey::Blacklisted(wallet), &true);
+        } else {
+            env.storage()
+                .persistent()
+                .remove(&ComplianceDataKey::Blacklisted(wallet));
+        }
+    }
+
+    pub fn is_blacklisted(env: Env, wallet: Address) -> bool {
+        env.storage()
+            .persistent()
+            .has(&ComplianceDataKey::Blacklisted(wallet))
+    }
+
+    pub fn check_purchase(
+        env: Env,
+        buyer: Address,
+        pool_id: BytesN<32>,
+        _amount: u128,
+    ) -> ComplianceDecision {
+        if env
+            .storage()
+            .persistent()
+            .has(&ComplianceDataKey::Blacklisted(buyer.clone()))
+        {
+            return ComplianceDecision::Reject(BytesN::from_array(&env, &[0x01; 32]));
+        }
+
+        let config: PoolComplianceConfig =
+            match env
+                .storage()
+                .persistent()
+                .get(&ComplianceDataKey::PoolConfig(pool_id.clone()))
+            {
+                Some(cfg) => cfg,
+                None => return ComplianceDecision::Approve,
+            };
+
+        if config.kyc_required {
+            let kyc: Option<KycStatus> = env
+                .storage()
+                .persistent()
+                .get(&ComplianceDataKey::WalletKyc(buyer.clone()));
+            match kyc {
+                None => return ComplianceDecision::PendingKyc,
+                Some(status) => {
+                    if !status.verified || status.tier < config.min_kyc_tier {
+                        return ComplianceDecision::Reject(BytesN::from_array(&env, &[0x02; 32]));
+                    }
+                }
+            }
+        }
+
+        if let Some(external) = config.external_compliance_contract {
+            let mut args: Vec<Val> = Vec::new(&env);
+            args.push_back(buyer.into_val(&env));
+            args.push_back(pool_id.into_val(&env));
+            args.push_back(_amount.into_val(&env));
+            return env
+                .invoke_contract(&external, &Symbol::new(&env, "check_purchase"), args);
+        }
+
+        ComplianceDecision::Approve
+    }
+
+    pub fn set_compliance_contract(env: Env, pool_id: BytesN<32>, new_contract: Address) {
+        let admin: Address = env
+            .storage()
+            .instance()
+            .get(&ComplianceDataKey::Admin)
+            .unwrap();
+        admin.require_auth();
+        let mut config: PoolComplianceConfig = env
+            .storage()
+            .persistent()
+            .get(&ComplianceDataKey::PoolConfig(pool_id.clone()))
+            .unwrap_or(PoolComplianceConfig {
+                kyc_required: false,
+                min_kyc_tier: 0,
+                external_compliance_contract: None,
+            });
+        config.external_compliance_contract = Some(new_contract);
+        env.storage()
+            .persistent()
+            .set(&ComplianceDataKey::PoolConfig(pool_id), &config);
     }
 }
 
