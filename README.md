@@ -1844,6 +1844,12 @@ Overflow protection: CP stored as u256 (via multi-word arithmetic).
 
 ## 🤝 Contributing
 
+Contributions are welcome! Please read our full guide in [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+This project follows a [Code of Conduct](./CODE_OF_CONDUCT.md) — by participating, you agree to uphold it.
+
+### Quick Start
+
 ```bash
 # Fork and clone
 git clone https://github.com/YOUR_USERNAME/rwa-liquidity-bootstrapping-protocol.git
@@ -1853,7 +1859,9 @@ git checkout -b feature/your-feature
 
 # Test before PR
 cargo test --workspace
-cargo test --test integration
+
+# Lint
+cargo clippy --workspace -- -D warnings
 
 # PR against main
 ```
@@ -1865,6 +1873,8 @@ cargo test --test integration
 - 📊 **Simulations** — Add Python simulations for new curve types
 - 🌍 **Issuer guides** — Write configuration guides for specific asset classes
 - 🔌 **Integrations** — Build adapters for other Stellar DeFi protocols
+
+Browse the [issue tracker](https://github.com/your-org/rwa-liquidity-bootstrapping-protocol/issues) for open work — look for `good first issue` labels to get started.
 
 ---
 
