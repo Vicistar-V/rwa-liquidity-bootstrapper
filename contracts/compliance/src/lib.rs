@@ -1,6 +1,6 @@
 use soroban_sdk::{contract, contractimpl, contracttype, Address, BytesN, Env, IntoVal, Symbol, Val, Vec};
 
-use amm_math::ComplianceDecision;
+use amm_math::{ComplianceDecision, KycStatus, PoolComplianceConfig};
 
 #[contracttype]
 pub enum ComplianceDataKey {
@@ -9,23 +9,7 @@ pub enum ComplianceDataKey {
     PoolConfig(BytesN<32>),
     WalletKyc(Address),
     Blacklisted(Address),
-}
-
-#[contracttype]
-#[derive(Clone)]
-pub struct PoolComplianceConfig {
-    pub kyc_required: bool,
-    pub min_kyc_tier: u32,
-    pub external_compliance_contract: Option<Address>,
-}
-
-#[contracttype]
-#[derive(Clone)]
-pub struct KycStatus {
-    pub wallet: Address,
-    pub tier: u32,
-    pub verified: bool,
-    pub timestamp: u64,
+    ExternalContract(BytesN<32>),
 }
 
 #[contract]
@@ -33,7 +17,7 @@ pub struct ComplianceBridge;
 
 #[contractimpl]
 impl ComplianceBridge {
-    pub fn initialize(env: Env, admin: Address, pool_id: BytesN<32>, compliance_contract: Address) {
+    pub fn initialize(env: Env, admin: Address, pool_id: BytesN<32>, _compliance_contract: Address) {
         if env.storage().instance().has(&ComplianceDataKey::Initialized) {
             panic!("already initialized");
         }
@@ -48,7 +32,6 @@ impl ComplianceBridge {
         let config = PoolComplianceConfig {
             kyc_required: true,
             min_kyc_tier: 1,
-            external_compliance_contract: Some(compliance_contract),
         };
         env.storage()
             .persistent()
@@ -157,6 +140,19 @@ impl ComplianceBridge {
                 None => return ComplianceDecision::Approve,
             };
 
+        if let Some(external) = env
+            .storage()
+            .persistent()
+            .get::<_, Address>(&ComplianceDataKey::ExternalContract(pool_id.clone()))
+        {
+            let mut args: Vec<Val> = Vec::new(&env);
+            args.push_back(buyer.into_val(&env));
+            args.push_back(pool_id.into_val(&env));
+            args.push_back(_amount.into_val(&env));
+            return env
+                .invoke_contract(&external, &Symbol::new(&env, "check_purchase"), args);
+        }
+
         if config.kyc_required {
             let kyc: Option<KycStatus> = env
                 .storage()
@@ -172,15 +168,6 @@ impl ComplianceBridge {
             }
         }
 
-        if let Some(external) = config.external_compliance_contract {
-            let mut args: Vec<Val> = Vec::new(&env);
-            args.push_back(buyer.into_val(&env));
-            args.push_back(pool_id.into_val(&env));
-            args.push_back(_amount.into_val(&env));
-            return env
-                .invoke_contract(&external, &Symbol::new(&env, "check_purchase"), args);
-        }
-
         ComplianceDecision::Approve
     }
 
@@ -191,19 +178,9 @@ impl ComplianceBridge {
             .get(&ComplianceDataKey::Admin)
             .unwrap();
         admin.require_auth();
-        let mut config: PoolComplianceConfig = env
-            .storage()
-            .persistent()
-            .get(&ComplianceDataKey::PoolConfig(pool_id.clone()))
-            .unwrap_or(PoolComplianceConfig {
-                kyc_required: false,
-                min_kyc_tier: 0,
-                external_compliance_contract: None,
-            });
-        config.external_compliance_contract = Some(new_contract);
         env.storage()
             .persistent()
-            .set(&ComplianceDataKey::PoolConfig(pool_id), &config);
+            .set(&ComplianceDataKey::ExternalContract(pool_id), &new_contract);
     }
 }
 

@@ -205,11 +205,27 @@ pub enum PoolType {
 }
 
 #[contracttype]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ComplianceDecision {
     Approve,
     Reject(BytesN<32>),
     PendingKyc,
+}
+
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct PoolComplianceConfig {
+    pub kyc_required: bool,
+    pub min_kyc_tier: u32,
+}
+
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct KycStatus {
+    pub wallet: Address,
+    pub tier: u32,
+    pub verified: bool,
+    pub timestamp: u64,
 }
 
 #[cfg(test)]
