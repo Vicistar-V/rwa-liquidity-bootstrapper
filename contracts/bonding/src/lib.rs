@@ -4,7 +4,7 @@ use soroban_sdk::{
 
 use amm_math::{
     fixed_div, fixed_ln, fixed_mul, fixed_pow, integral_logarithmic, sigmoid,
-    BondingConfig, BondingCurvePool, CurveType, SCALE,
+    BondingConfig, BondingCurvePool, ComplianceDecision, CurveType, SCALE,
 };
 
 #[contracttype]
@@ -261,6 +261,23 @@ impl BondingCurveContract {
             &Symbol::new(&env, "record_purchase"),
             fl_record_args,
         );
+
+        if pool.kyc_required {
+            let mut comp_args: Vec<Val> = Vec::new(&env);
+            comp_args.push_back(buyer.clone().into_val(&env));
+            comp_args.push_back(pool_id.clone().into_val(&env));
+            comp_args.push_back(tokens_out.into_val(&env));
+            let decision: ComplianceDecision = env.invoke_contract(
+                &pool.compliance_contract,
+                &Symbol::new(&env, "check_purchase"),
+                comp_args,
+            );
+            match decision {
+                ComplianceDecision::Reject(_) => panic!("purchase rejected by compliance"),
+                ComplianceDecision::PendingKyc => panic!("KYC verification required"),
+                ComplianceDecision::Approve => {}
+            }
+        }
 
         let reserve_client = token::Client::new(&env, &pool.reserve_token);
         reserve_client.transfer(&buyer, &env.current_contract_address(), &(usdc_in as i128));
