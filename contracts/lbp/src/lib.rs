@@ -2,7 +2,7 @@ use soroban_sdk::{
     contract, contractimpl, contracttype, token, Address, BytesN, Env, IntoVal, Symbol, Val, Vec,
 };
 
-use amm_math::{fixed_div, fixed_mul, fixed_pow, LbpConfig, LbpPool, SCALE};
+use amm_math::{fixed_div, fixed_mul, fixed_pow, ComplianceDecision, LbpConfig, LbpPool, SCALE};
 
 #[contracttype]
 pub enum LbpDataKey {
@@ -155,6 +155,23 @@ impl LbpPoolContract {
             &Symbol::new(&env, "record_purchase"),
             fl_record_args,
         );
+
+        if pool.kyc_required {
+            let mut comp_args: Vec<Val> = Vec::new(&env);
+            comp_args.push_back(buyer.clone().into_val(&env));
+            comp_args.push_back(pool_id.clone().into_val(&env));
+            comp_args.push_back(rwa_out.into_val(&env));
+            let decision: ComplianceDecision = env.invoke_contract(
+                &pool.compliance_contract,
+                &Symbol::new(&env, "check_purchase"),
+                comp_args,
+            );
+            match decision {
+                ComplianceDecision::Reject(_) => panic!("purchase rejected by compliance"),
+                ComplianceDecision::PendingKyc => panic!("KYC verification required"),
+                ComplianceDecision::Approve => {}
+            }
+        }
 
         let usdc_client = token::Client::new(&env, &pool.usdc_token);
         usdc_client.transfer(&buyer, &env.current_contract_address(), &(max_usdc_in as i128));
