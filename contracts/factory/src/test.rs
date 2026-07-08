@@ -337,6 +337,9 @@ fn test_mark_pool_graduated() {
 
     factory_client.init(&admin, &lbp_id, &bonding_id, &cl_id, &fl_id, &oracle_id);
 
+    let graduation_id = Address::generate(&env);
+    factory_client.set_graduation_contract(&graduation_id);
+
     let config = LbpConfig {
         rwa_token: token_id.clone(),
         usdc_token: token_id,

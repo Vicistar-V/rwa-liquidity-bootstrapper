@@ -22,6 +22,7 @@ pub enum DataKey {
     ClContract,
     FairLaunchContract,
     OracleContract,
+    GraduationContract,
 }
 
 #[contract]
@@ -395,7 +396,15 @@ impl PoolFactory {
             .unwrap()
     }
 
+    pub fn set_graduation_contract(env: Env, graduation: Address) {
+        if !env.storage().instance().has(&DataKey::GraduationContract) {
+            env.storage().instance().set(&DataKey::GraduationContract, &graduation);
+        }
+    }
+
     pub fn mark_pool_graduated(env: Env, pool_id: BytesN<32>) {
+        let graduation: Address = env.storage().instance().get(&DataKey::GraduationContract).unwrap();
+        graduation.require_auth();
         let mut summary: PoolSummary = env
             .storage()
             .persistent()
